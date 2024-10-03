@@ -38,11 +38,11 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
 
    1. Clone o repositório:
       ```bash
-      git clone https://github.com/seu_usuario/OdontoFast.git
+      git clone https://github.com/sousa-sara/demo.git
       ```
    2. Acesse o diretório do projeto:
       ```bash
-      cd OdontoFast
+      cd demo
       ```
    3. Certifique-se de ter o JDK 17 e Maven instalados.
    4. Compile e inicie a aplicação:
