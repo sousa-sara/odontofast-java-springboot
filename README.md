@@ -23,7 +23,8 @@ definido da solução, incluindo a persistência no banco de dados Oracle.
 - Oracle Database
 - Maven
 
-   ## **Instrução de Como Rodar a Aplicação**  
+## **Instrução de Como Rodar a Aplicação**  
+
    1. Clone o repositório:
       ```bash
       git clone https://github.com/seu_usuario/OdontoFast.git
@@ -39,9 +40,14 @@ definido da solução, incluindo a persistência no banco de dados Oracle.
       ```
    5. Acesse a aplicação em: `http://localhost:8080`
 
-   ## **Imagem dos Diagramas**  
+   ## **Imagens dos Diagramas**
+
+   **Entidades**
+  
    ![Diagrama de Entidades](images-readme/DiagramaEntidade.png)
-   ![Diagrama de Classes](images-readme/ClassesUML.png)
+
+   **Classes**
+   ![Diagrama de Classes](images-readme/ClasseUML.png)
 
    ## **Link para Vídeo**  
    [Link para vídeo apresentando a Proposta Tecnológica](URL_do_video)
