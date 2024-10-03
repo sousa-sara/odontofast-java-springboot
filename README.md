@@ -58,6 +58,7 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
    ![Diagrama de Entidades](images-readme/DiagramaEntidade.png)
 
    **Classes**
+   
    ![Diagrama de Classes](images-readme/ClasseUML.png)
 
    *PS.: Mais detalhamentos sobre o projeto na pasta 'documentos', no arquivo 'Documentacao_Modelo_App_de_Acompanhamento_Odontológico.pdf'.*
