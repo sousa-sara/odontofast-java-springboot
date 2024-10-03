@@ -15,9 +15,6 @@ Nosso projeto visa implementar todo o backend necessário, incluindo a API RESTf
 
 A aplicação não apenas facilita a transparência e o monitoramento do tratamento por parte dos pacientes, como também oferece aos dentistas um controle preciso sobre os cuidados preventivos realizados. Tudo isso, visando a redução de sinistros e a promoção de bons hábitos de saúde bucal, alinhando-se diretamente à proposta da nossa solução tecnológica.
 
-*PS.: Mais detalhamentos sobre o projeto na pasta 'documentos', no arquivo 'Documentacao_Modelo_App_de_Acompanhamento_Odontológico.pdf'.*
-
-
 ## **Turma, Integrantes do Grupo, RM & Responsabilidades**  
    - **Turma**: 2TDSPS
 
@@ -62,6 +59,8 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
 
    **Classes**
    ![Diagrama de Classes](images-readme/ClasseUML.png)
+
+   *PS.: Mais detalhamentos sobre o projeto na pasta 'documentos', no arquivo 'Documentacao_Modelo_App_de_Acompanhamento_Odontológico.pdf'.*
 
    ## **Link para Vídeo**  
    [Link para vídeo apresentando a Proposta Tecnológica](https://drive.google.com/file/d/1PLQXwP-C8_bW0AqzS9P1nhGlPPuoBKqa/view?usp=sharing)
