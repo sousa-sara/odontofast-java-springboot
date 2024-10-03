@@ -61,7 +61,7 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
    ![Diagrama de Classes](images-readme/ClasseUML.png)
 
    ## **Link para Vídeo**  
-   [Link para vídeo apresentando a Proposta Tecnológica](URL_do_video)
+   [Link para vídeo apresentando a Proposta Tecnológica](https://drive.google.com/file/d/1PLQXwP-C8_bW0AqzS9P1nhGlPPuoBKqa/view?usp=sharing)
 
 ## **Listagem de Todos os Endpoints**  
 
