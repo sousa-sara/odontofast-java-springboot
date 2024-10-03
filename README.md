@@ -17,6 +17,9 @@ definido da solução, incluindo a persistência no banco de dados Oracle.
    - **Sara Sousa/RM:552656**: Responsável por criar pacotes DTO e Controller, participar da documentação técnica e realização do vídeo.
    - **Leonardo Oliveira/RM:554024**: Responsável por criar pacotes Repository e Service, realizar testes de endpoints e participar da documentação técnica.
 
+## **Cronograma de Desenvolvimento**
+![Cronograma](images-readme/JavaCronogramaChallenge.png)
+
 ## Tecnologias Utilizadas
 - Java 17
 - Spring Boot 3.3.3
