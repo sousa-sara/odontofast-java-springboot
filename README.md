@@ -42,6 +42,7 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
       ```
    2. Acesse o diretório do projeto:
       ```bash
+      cd odontofast-java-springboot
       cd demo
       ```
    3. Certifique-se de ter o JDK 17 e Maven instalados.
@@ -50,6 +51,8 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
       mvn spring-boot:run
       ```
    5. Acesse a aplicação em: `http://localhost:8080`
+   6. Teste localmente com: `http://localhost:8080/api/usuarios`
+   7. Para testes mais aprofundados com Postman, acessar o arquivo json na pasta 'documentos' de nome 'OdontoFast.postman_collection.json'.
 
    ## **Imagens dos Diagramas**
 
