@@ -38,7 +38,7 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
 
    1. Clone o repositório:
       ```bash
-      git clone https://github.com/sousa-sara/demo.git
+      git clone https://github.com/odontofast-java-springboot.git
       ```
    2. Acesse o diretório do projeto:
       ```bash
