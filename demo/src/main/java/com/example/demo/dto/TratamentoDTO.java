@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
+
 import java.util.Date;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TratamentoDTO {
+public class TratamentoDTO extends RepresentationModel<TratamentoDTO>  {
 
     private Long id_tratamento;
     private String tipo_tratamento;

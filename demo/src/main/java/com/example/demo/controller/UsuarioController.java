@@ -7,10 +7,14 @@ import com.example.demo.entity.PlanoDeSaude;
 import com.example.demo.entity.Usuario;
 import com.example.demo.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,41 +26,77 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<EntityModel<UsuarioDTO>> criarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         Usuario usuario = converterDtoParaEntidade(usuarioDTO);
         Usuario novoUsuario = usuarioService.criarUsuario(usuario);
         UsuarioDTO novoUsuarioDTO = converterEntidadeParaDto(novoUsuario);
-        return ResponseEntity.ok(novoUsuarioDTO);
+
+        // Adicionando links ao DTO
+        EntityModel<UsuarioDTO> resource = EntityModel.of(novoUsuarioDTO);
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(novoUsuarioDTO.getIdUsuario())).withSelfRel());
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(novoUsuarioDTO.getIdUsuario(), novoUsuarioDTO)).withRel("atualizar"));
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(novoUsuarioDTO.getIdUsuario())).withRel("excluir"));
+
+        return ResponseEntity.created(URI.create(resource.getRequiredLink("self").getHref())).body(resource);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> obterUsuario(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<UsuarioDTO>> obterUsuario(@PathVariable Long id) {
         Usuario usuario = usuarioService.obterUsuarioPorId(id);
         UsuarioDTO usuarioDTO = converterEntidadeParaDto(usuario);
-        return ResponseEntity.ok(usuarioDTO);
+
+        // Adicionando links ao DTO
+        EntityModel<UsuarioDTO> resource = EntityModel.of(usuarioDTO);
+
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(id)).withSelfRel());
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(id, usuarioDTO)).withRel("atualizar"));
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(id)).withRel("excluir"));
+
+        return ResponseEntity.ok(resource);
     }
 
     @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
+    public ResponseEntity<List<EntityModel<UsuarioDTO>>> listarUsuarios() {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
-        List<UsuarioDTO> usuariosDTO = usuarios.stream()
-                .map(this::converterEntidadeParaDto)
+        List<EntityModel<UsuarioDTO>> usuariosDTO = usuarios.stream()
+                .map(usuario -> {
+                    UsuarioDTO dto = converterEntidadeParaDto(usuario);
+                    EntityModel<UsuarioDTO> resource = EntityModel.of(dto);
+                    Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(dto.getIdUsuario())).withSelfRel();
+                    resource.add(selfLink);
+                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(dto.getIdUsuario(), dto)).withRel("atualizar"));
+                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(dto.getIdUsuario())).withRel("excluir"));
+                    return resource;
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(usuariosDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<EntityModel<UsuarioDTO>> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
         Usuario usuario = converterDtoParaEntidade(usuarioDTO);
         Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuario);
         UsuarioDTO usuarioAtualizadoDTO = converterEntidadeParaDto(usuarioAtualizado);
-        return ResponseEntity.ok(usuarioAtualizadoDTO);
+
+        // Adicionando links ao DTO
+        EntityModel<UsuarioDTO> resource = EntityModel.of(usuarioAtualizadoDTO);
+
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(id)).withSelfRel());
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(id, usuarioAtualizadoDTO)).withRel("atualizar"));
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(id)).withRel("excluir"));
+
+        return ResponseEntity.ok(resource);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluirUsuario(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Void>> excluirUsuario(@PathVariable Long id) {
         usuarioService.excluirUsuario(id);
-        return ResponseEntity.noContent().build();
+
+        // Retornar um link para criar um novo usuário, por exemplo
+        EntityModel<Void> resource = EntityModel.of(null);
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).listarUsuarios()).withRel("listarUsuarios"));
+
+        return ResponseEntity.noContent().location(URI.create(resource.getRequiredLink("listarUsuarios").getHref())).build();
     }
 
     // Conversão de DTO para Entidade

@@ -67,6 +67,10 @@
 			<version>${lombok.version}</version> <!-- Referenciando a versão definida nas propriedades -->
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
