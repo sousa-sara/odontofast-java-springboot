@@ -18,18 +18,70 @@ A aplicação não apenas facilita a transparência e o monitoramento do tratame
 ## **Turma, Integrantes do Grupo, RM & Responsabilidades**  
    - **Turma**: 2TDSPS
 
+### Sprint 1:
    - **Felipe Amador/RM:553528**: Responsável por definir o escopo das entidades, criar as classes de entidades e participar da documentação técnica.
    - **Sara Sousa/RM:552656**: Responsável por criar pacotes DTO e Controller, participar da documentação técnica e realização do vídeo.
    - **Leonardo Oliveira/RM:554024**: Responsável por criar pacotes Repository e Service, realizar testes de endpoints e participar da documentação técnica.
 
+### Sprint 2:
+   - **Felipe Amador/RM:553528**: Responsável por Definir as melhorias e delegação de responsabilidades, Implementação da Conexão com Banco de Dados e Perfil de Teste, Melhoria através da conversão de DTO para Entidade (e vice-versa) e Atualização da documentação e vídeo da proposta tecnológica.
+   - **Sara Sousa/RM:552656**: Responsável por Definir as melhorias e delegação de responsabilidades, Melhoria da camada de DTO e Segurança (Encapsulamento da lógica), Melhoria através da conversão de DTO para Entidade (e vice-versa) e Atualização da documentação e vídeo da proposta tecnológica.
+   - **Leonardo Oliveira/RM:554024**: Responsável por Definir as melhorias e delegação de responsabilidades, Adicionar HATEOAS, Implementação do CORS para a futura integração à aplicação Mobile e Atualização da documentação e vídeo da proposta tecnológica
+
 ## **Cronograma de Desenvolvimento**
+
+### Sprint 1
 ![Cronograma](images-readme/JavaCronogramaChallenge.png)
+
+### Sprint 2
+![Cronograma](images-readme/CronogramaJavaChallengeOdontoprevSprint2.png)
 
 ## Tecnologias Utilizadas
 - Java 17
 - Spring Boot 3.3.3
 - Oracle Database
+- H2 Database (para testes)
 - Maven
+
+## Destaques Técnicos de Atualização
+
+### 1. Camada de DTO e Segurança
+- Os controladores agora utilizam DTOs, como `UsuarioDTO` e `DentistaPlanoSaudeDTO`, para transferência de dados
+- Essa abordagem encapsula a lógica e melhora a segurança ao evitar a exposição direta das entidades
+
+### 2. Conversão de DTO para Entidade
+- Foram adicionados métodos para converter DTOs para entidades e vice-versa em controladores como `UsuarioController` e `DentistaPlanoSaudeController`
+- Garante consistência na manipulação de dados
+
+### 3. HATEOAS para Navegação Melhorada
+- O projeto agora implementa links HATEOAS aprimorados nos controladores
+- Permite uma navegação mais intuitiva e autodescritiva
+
+### 4. Configuração de CORS
+- Uma classe de configuração `CorsConfig` foi implementada
+- Permite requisições de endereços específicos, facilitando a integração com clientes, como emuladores Android
+
+### 5. Conexões com Banco de Dados e Perfil de Teste
+- A aplicação é configurada para conectar-se ao banco de dados Oracle em produção
+- Utiliza banco em memória H2 em ambientes de teste
+- No perfil de teste (`test`), a aplicação carrega um arquivo `import.sql` para popular automaticamente o banco com dados iniciais
+
+## Configurações
+
+### Arquivo application.properties
+
+```properties
+# Configuração de perfil para H2
+spring.profiles.active=test
+
+# Configuração para H2
+spring.datasource.url=jdbc:h2:mem:odontoprev
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.h2.console.enabled=true
+spring.sql.init.data-locations=classpath:import.sql # Comando para popular com dados iniciais
+```
 
 ## **Instrução de Como Rodar a Aplicação**  
 
