@@ -1,11 +1,13 @@
 package com.example.demo.entity;
 
+import com.example.demo.dto.DentistaDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.Set;
 
@@ -45,5 +47,13 @@ public class Dentista {
     // Construtor com ID
     public Dentista(Long idDentista) {
         this.idDentista = idDentista;
+    }
+
+    public Dentista (DentistaDTO dentistaDTO){
+        this.nomeDentista = dentistaDTO.getNomeDentista();
+        this.idDentista = dentistaDTO.getIdDentista();
+        this.senhaDentista = dentistaDTO.getSenhaDentista();
+        this.especialidade = dentistaDTO.getEspecialidade();
+        this.cro = dentistaDTO.getCro();
     }
 }

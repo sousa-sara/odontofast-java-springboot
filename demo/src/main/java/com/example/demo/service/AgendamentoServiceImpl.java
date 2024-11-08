@@ -7,6 +7,7 @@ import com.example.demo.entity.Usuario;
 import com.example.demo.repository.AgendamentoRepository;
 import com.example.demo.repository.DentistaRepository;
 import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.service.interfaces.AgendamentoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class AgendamentoServiceImpl implements AgendamentoService {
     }
 
     @Override
-    public List<AgendamentoDTO> listarAgendamentos() {
+    public List<AgendamentoDTO> listarAgendamentos(AgendamentoDTO agendamentoDTO) {
         List<Agendamento> agendamentos = agendamentoRepository.findAll();
         return agendamentos.stream()
                 .map(this::mapearEntidadeParaDTO)
@@ -58,8 +59,9 @@ public class AgendamentoServiceImpl implements AgendamentoService {
     }
 
     @Override
-    public void excluirAgendamento(Long id) {
+    public boolean excluirAgendamento(Long id) {
         agendamentoRepository.deleteById(id);
+        return false;
     }
 
     // Método privado para converter entidade em DTO

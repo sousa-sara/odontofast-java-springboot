@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.interfaces;
 
 import com.example.demo.dto.ChecklistDTO;
 
@@ -10,6 +10,6 @@ public interface ChecklistService {
     ChecklistDTO obterChecklistPorId(Long id);
     List<ChecklistDTO> listarChecklists();
     ChecklistDTO atualizarChecklist(Long id, ChecklistDTO checklistDTO);
-    void excluirChecklist(Long id);
+    boolean excluirChecklist(Long id);
 
 }

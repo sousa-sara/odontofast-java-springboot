@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.PlanoDeSaude;
 import com.example.demo.repository.PlanoDeSaudeRepository;
+import com.example.demo.service.interfaces.PlanoDeSaudeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

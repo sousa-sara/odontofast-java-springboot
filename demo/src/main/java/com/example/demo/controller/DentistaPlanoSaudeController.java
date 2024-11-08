@@ -1,16 +1,12 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.DentistaPlanoSaudeDTO;
 import com.example.demo.entity.DentistaPlanoSaude;
-import com.example.demo.service.DentistaPlanoSaudeService;
+import com.example.demo.service.interfaces.DentistaPlanoSaudeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,49 +17,69 @@ public class DentistaPlanoSaudeController {
     @Autowired
     private DentistaPlanoSaudeService dentistaPlanoSaudeService;
 
-    // Endpoint para listar todas as associações
     @GetMapping
-    public ResponseEntity<List<EntityModel<DentistaPlanoSaude>>> listarAssociacoes() {
-        List<DentistaPlanoSaude> associacoes = dentistaPlanoSaudeService.listarAssociacoes();
-        List<EntityModel<DentistaPlanoSaude>> recursos = associacoes.stream()
-                .map(this::toEntityModel)
+    public ResponseEntity<List<DentistaPlanoSaudeDTO>> listarAssociacoes() {
+        List<DentistaPlanoSaudeDTO> recursos = dentistaPlanoSaudeService.listarAssociacoes().stream()
+                .map(this::convertToDTOWithLinks)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(recursos);
     }
 
-    // Endpoint para obter uma associação específica por ID
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<DentistaPlanoSaude>> obterAssociacaoPorId(@PathVariable Long id) {
+    public ResponseEntity<DentistaPlanoSaudeDTO> obterAssociacaoPorId(@PathVariable Long id) {
         DentistaPlanoSaude associacao = dentistaPlanoSaudeService.obterAssociacaoPorId(id);
-        return associacao != null ? ResponseEntity.ok(toEntityModel(associacao)) : ResponseEntity.notFound().build();
+        if (associacao != null) {
+            DentistaPlanoSaudeDTO resource = convertToDTOWithLinks(associacao);
+            return ResponseEntity.ok(resource);
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // Endpoint para criar uma nova associação entre dentista e plano de saúde
     @PostMapping("/associar")
-    public ResponseEntity<EntityModel<DentistaPlanoSaude>> associarDentistaAoPlano(@RequestBody DentistaPlanoSaudeDTO dentistaPlanoSaudeDTO) {
-        DentistaPlanoSaude associacao = dentistaPlanoSaudeService.associarDentistaAoPlano(dentistaPlanoSaudeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toEntityModel(associacao));
+    public ResponseEntity<DentistaPlanoSaudeDTO> associarDentistaAoPlano(@RequestBody DentistaPlanoSaudeDTO dentistaPlanoSaudeDTO) {
+        try {
+            DentistaPlanoSaude associacao = dentistaPlanoSaudeService.associarDentistaAoPlano(dentistaPlanoSaudeDTO);
+            DentistaPlanoSaudeDTO resource = convertToDTOWithLinks(associacao);
+            return ResponseEntity.status(HttpStatus.CREATED).body(resource);
+        } catch (Exception e) {
+            System.err.println("Erro ao associar dentista ao plano: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    // Endpoint para atualizar uma associação existente
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<DentistaPlanoSaude>> atualizarAssociacao(@PathVariable Long id, @RequestBody DentistaPlanoSaudeDTO dentistaPlanoSaudeDTO) {
+    public ResponseEntity<DentistaPlanoSaudeDTO> atualizarAssociacao(@PathVariable Long id, @RequestBody DentistaPlanoSaudeDTO dentistaPlanoSaudeDTO) {
         DentistaPlanoSaude associacaoAtualizada = dentistaPlanoSaudeService.atualizarAssociacao(id, dentistaPlanoSaudeDTO);
-        return associacaoAtualizada != null ? ResponseEntity.ok(toEntityModel(associacaoAtualizada)) : ResponseEntity.notFound().build();
+        if (associacaoAtualizada != null) {
+            DentistaPlanoSaudeDTO resource = convertToDTOWithLinks(associacaoAtualizada);
+            return ResponseEntity.ok(resource);
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // Endpoint para excluir uma associação entre dentista e plano de saúde
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirAssociacao(@PathVariable Long id) {
-        boolean excluido = dentistaPlanoSaudeService.excluirAssociacao(id);
-        return excluido ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        if (dentistaPlanoSaudeService.excluirAssociacao(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Método para converter entidade em EntityModel com links HATEOAS
-    private EntityModel<DentistaPlanoSaude> toEntityModel(DentistaPlanoSaude associacao) {
-        EntityModel<DentistaPlanoSaude> entityModel = EntityModel.of(associacao);
-        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaPlanoSaudeController.class).obterAssociacaoPorId(associacao.getId())).withSelfRel();
-        entityModel.add(selfLink);
-        return entityModel;
+    private DentistaPlanoSaudeDTO convertToDTO(DentistaPlanoSaude entity) {
+        DentistaPlanoSaudeDTO dto = new DentistaPlanoSaudeDTO();
+        dto.setDentistaId(entity.getDentista().getIdDentista());
+        dto.setPlanoId(entity.getPlanoDeSaude().getIdPlano());
+        return dto;
+    }
+
+    private DentistaPlanoSaudeDTO convertToDTOWithLinks(DentistaPlanoSaude associacao) {
+        DentistaPlanoSaudeDTO resource = convertToDTO(associacao);
+        Long id = associacao.getId();
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaPlanoSaudeController.class).obterAssociacaoPorId(id)).withSelfRel());
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaPlanoSaudeController.class).listarAssociacoes()).withRel("listarAssociacoes"));
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaPlanoSaudeController.class).atualizarAssociacao(id, resource)).withRel("atualizar"));
+        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaPlanoSaudeController.class).excluirAssociacao(id)).withRel("excluir"));
+        return resource;
     }
 }

@@ -1,3 +1,4 @@
+
 package com.example.demo.service;
 
 import com.example.demo.dto.ChecklistDTO;
@@ -5,6 +6,7 @@ import com.example.demo.entity.Checklist;
 import com.example.demo.entity.Usuario;
 import com.example.demo.repository.ChecklistRepository;
 import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.service.interfaces.ChecklistService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,8 +55,9 @@ public class ChecklistServiceImpl implements ChecklistService {
     }
 
     @Override
-    public void excluirChecklist(Long id) {
+    public boolean excluirChecklist(Long id) {
         checklistRepository.deleteById(id);
+        return true;
     }
 
     // Método privado para converter entidade em DTO

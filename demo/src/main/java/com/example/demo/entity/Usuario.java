@@ -45,4 +45,6 @@ public class Usuario {
     @JoinColumn(name = "plano_id_plano", nullable = false)
     private PlanoDeSaude planoDeSaude;
 
+    public Usuario(Long usuarioId) {
+    }
 }

@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Notificacao;
 import com.example.demo.repository.NotificacaoRepository;
+import com.example.demo.service.interfaces.NotificacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

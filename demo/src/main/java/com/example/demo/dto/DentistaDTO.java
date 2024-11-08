@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.entity.Dentista;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,4 +19,11 @@ public class DentistaDTO extends RepresentationModel<DentistaDTO> {
     private String especialidade;
     private String cro;
 
+    public DentistaDTO(Dentista dentista) {
+        this.idDentista = dentista.getIdDentista();
+        this.nomeDentista = dentista.getNomeDentista();
+        this.senhaDentista = dentista.getSenhaDentista();
+        this.especialidade = dentista.getEspecialidade();
+        this.cro = dentista.getCro();
+    }
 }

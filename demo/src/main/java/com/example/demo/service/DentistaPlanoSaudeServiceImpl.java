@@ -7,6 +7,7 @@ import com.example.demo.entity.DentistaPlanoSaude;
 import com.example.demo.repository.DentistaRepository;
 import com.example.demo.repository.PlanoDeSaudeRepository;
 import com.example.demo.repository.DentistaPlanoSaudeRepository;
+import com.example.demo.service.interfaces.DentistaPlanoSaudeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

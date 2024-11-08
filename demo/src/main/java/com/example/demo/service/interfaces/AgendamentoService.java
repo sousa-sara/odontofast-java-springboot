@@ -1,5 +1,4 @@
-package com.example.demo.service;
-
+package com.example.demo.service.interfaces;
 import com.example.demo.dto.AgendamentoDTO;
 import java.util.List;
 
@@ -7,8 +6,8 @@ public interface AgendamentoService {
 
     AgendamentoDTO criarAgendamento(AgendamentoDTO agendamentoDTO);
     AgendamentoDTO obterAgendamentoPorId(Long id);
-    List<AgendamentoDTO> listarAgendamentos();
+    List<AgendamentoDTO> listarAgendamentos(AgendamentoDTO agendamentoDTO);
     AgendamentoDTO atualizarAgendamento(Long id, AgendamentoDTO agendamentoDTO);
-    void excluirAgendamento(Long id);
+    boolean excluirAgendamento(Long id);
 
 }

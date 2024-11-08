@@ -1,21 +1,18 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.entity.Dentista;
 import com.example.demo.entity.Notificacao;
 import com.example.demo.entity.PlanoDeSaude;
 import com.example.demo.entity.Usuario;
-import com.example.demo.service.UsuarioService;
+import com.example.demo.service.interfaces.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-
-import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,80 +23,60 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<EntityModel<UsuarioDTO>> criarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) {
-        Usuario usuario = converterDtoParaEntidade(usuarioDTO);
-        Usuario novoUsuario = usuarioService.criarUsuario(usuario);
-        UsuarioDTO novoUsuarioDTO = converterEntidadeParaDto(novoUsuario);
-
-        // Adicionando links ao DTO
-        EntityModel<UsuarioDTO> resource = EntityModel.of(novoUsuarioDTO);
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(novoUsuarioDTO.getIdUsuario())).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(novoUsuarioDTO.getIdUsuario(), novoUsuarioDTO)).withRel("atualizar"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(novoUsuarioDTO.getIdUsuario())).withRel("excluir"));
-
-        return ResponseEntity.created(URI.create(resource.getRequiredLink("self").getHref())).body(resource);
+    public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) {
+        try {
+            Usuario novoUsuario = usuarioService.criarUsuario(converterDtoParaEntidade(usuarioDTO));
+            UsuarioDTO resource = converterEntidadeParaDto(novoUsuario);
+            adicionarLinks(resource);
+            return ResponseEntity.status(HttpStatus.CREATED).body(resource);
+        } catch (Exception e) {
+            System.err.println("Erro ao criar usuário: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<UsuarioDTO>> obterUsuario(@PathVariable Long id) {
-        Usuario usuario = usuarioService.obterUsuarioPorId(id);
-        UsuarioDTO usuarioDTO = converterEntidadeParaDto(usuario);
-
-        // Adicionando links ao DTO
-        EntityModel<UsuarioDTO> resource = EntityModel.of(usuarioDTO);
-
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(id)).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(id, usuarioDTO)).withRel("atualizar"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(id)).withRel("excluir"));
-
-        return ResponseEntity.ok(resource);
+    public ResponseEntity<UsuarioDTO> obterUsuario(@PathVariable Long id) {
+        Optional<Usuario> usuarioOptional = Optional.ofNullable(usuarioService.obterUsuarioPorId(id));
+        return usuarioOptional.map(usuario -> {
+            UsuarioDTO resource = converterEntidadeParaDto(usuario);
+            adicionarLinks(resource);
+            return ResponseEntity.ok(resource);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<EntityModel<UsuarioDTO>>> listarUsuarios() {
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         List<Usuario> usuarios = usuarioService.listarUsuarios();
-        List<EntityModel<UsuarioDTO>> usuariosDTO = usuarios.stream()
-                .map(usuario -> {
-                    UsuarioDTO dto = converterEntidadeParaDto(usuario);
-                    EntityModel<UsuarioDTO> resource = EntityModel.of(dto);
-                    Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(dto.getIdUsuario())).withSelfRel();
-                    resource.add(selfLink);
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(dto.getIdUsuario(), dto)).withRel("atualizar"));
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(dto.getIdUsuario())).withRel("excluir"));
-                    return resource;
-                })
+        List<UsuarioDTO> usuarioDTOs = usuarios.stream()
+                .map(this::converterEntidadeParaDto)
+                .peek(this::adicionarLinks)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(usuariosDTO);
+        return ResponseEntity.ok(usuarioDTOs);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<UsuarioDTO>> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
-        Usuario usuario = converterDtoParaEntidade(usuarioDTO);
-        Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuario);
-        UsuarioDTO usuarioAtualizadoDTO = converterEntidadeParaDto(usuarioAtualizado);
-
-        // Adicionando links ao DTO
-        EntityModel<UsuarioDTO> resource = EntityModel.of(usuarioAtualizadoDTO);
-
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(id)).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(id, usuarioAtualizadoDTO)).withRel("atualizar"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(id)).withRel("excluir"));
-
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
+        Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, converterDtoParaEntidade(usuarioDTO));
+        UsuarioDTO resource = converterEntidadeParaDto(usuarioAtualizado);
+        adicionarLinks(resource);
         return ResponseEntity.ok(resource);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<EntityModel<Void>> excluirUsuario(@PathVariable Long id) {
+    public ResponseEntity<Void> excluirUsuario(@PathVariable Long id) {
         usuarioService.excluirUsuario(id);
-
-        // Retornar um link para criar um novo usuário, por exemplo
-        EntityModel<Void> resource = EntityModel.of(null);
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).listarUsuarios()).withRel("listarUsuarios"));
-
-        return ResponseEntity.noContent().location(URI.create(resource.getRequiredLink("listarUsuarios").getHref())).build();
+        return ResponseEntity.noContent().build();
     }
 
-    // Conversão de DTO para Entidade
+    // Método para adicionar links HATEOAS ao DTO
+    private void adicionarLinks(UsuarioDTO usuarioDTO) {
+        usuarioDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).obterUsuario(usuarioDTO.getIdUsuario())).withSelfRel());
+        usuarioDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).atualizarUsuario(usuarioDTO.getIdUsuario(), usuarioDTO)).withRel("atualizar"));
+        usuarioDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).listarUsuarios()).withRel("listarUsuarios"));
+        usuarioDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UsuarioController.class).excluirUsuario(usuarioDTO.getIdUsuario())).withRel("excluir"));
+    }
+
     private Usuario converterDtoParaEntidade(UsuarioDTO usuarioDTO) {
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(usuarioDTO.getIdUsuario());

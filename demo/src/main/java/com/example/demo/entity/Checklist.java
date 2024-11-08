@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.example.demo.dto.ChecklistDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -11,8 +12,8 @@ import lombok.Setter;
 @Table(name = "c_op_checklist")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class Checklist {
 
     @Id
@@ -32,5 +33,4 @@ public class Checklist {
     @ManyToOne
     @JoinColumn(name = "usuario_id_usuario", nullable = false)
     private Usuario usuario; // Associa o Checklist a um Usuário
-
 }

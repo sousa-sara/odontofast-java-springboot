@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Dentista;
 import com.example.demo.repository.DentistaRepository;
+import com.example.demo.service.interfaces.DentistaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class DentistaServiceImpl implements DentistaService {
             throw new IllegalArgumentException("O nome do dentista é obrigatório.");
         }
 
+        // Dentista destista  = new Dentista(dentistaDTO);
         return dentistaRepository.save(dentista);
     }
 

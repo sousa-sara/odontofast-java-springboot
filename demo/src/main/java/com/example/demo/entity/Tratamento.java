@@ -46,4 +46,6 @@ public class Tratamento {
     @JoinColumn(name = "usuario_id_usuario", nullable = false)
     private Usuario usuario;
 
+    public Tratamento(Long idTratamento, String tipoTratamento, Date dtInicio, Date dtFim, String descricao, String statusTratamento, Long dentistaIdDentista, Long usuarioIdUsuario) {
+    }
 }

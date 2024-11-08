@@ -1,17 +1,13 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.PlanoDeSaudeDTO;
 import com.example.demo.entity.PlanoDeSaude;
-import com.example.demo.service.PlanoDeSaudeService;
+import com.example.demo.service.interfaces.PlanoDeSaudeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,63 +19,59 @@ public class PlanoDeSaudeController {
     private PlanoDeSaudeService planoDeSaudeService;
 
     @PostMapping
-    public ResponseEntity<EntityModel<PlanoDeSaudeDTO>> criarPlanoSaude(@Valid @RequestBody PlanoDeSaudeDTO planoDeSaudeDTO) {
-        PlanoDeSaude novoPlanoDeSaude = planoDeSaudeService.criarPlanoDeSaude(convertToEntity(planoDeSaudeDTO));
-        EntityModel<PlanoDeSaudeDTO> resource = EntityModel.of(convertToDTO(novoPlanoDeSaude));
-
-        // Adicionando links
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).obterPlanoDeSaude(novoPlanoDeSaude.getIdPlano())).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).listarPlanosDeSaude()).withRel("listarPlanos"));
-
-        return ResponseEntity.created(URI.create(resource.getRequiredLink("self").getHref())).body(resource);
+    public ResponseEntity<PlanoDeSaudeDTO> criarPlanoSaude(@Valid @RequestBody PlanoDeSaudeDTO planoDeSaudeDTO) {
+        try {
+            PlanoDeSaude novoPlanoDeSaude = planoDeSaudeService.criarPlanoDeSaude(convertToEntity(planoDeSaudeDTO));
+            PlanoDeSaudeDTO dtoResponse = convertToDTO(novoPlanoDeSaude);
+            adicionarLinks(dtoResponse);
+            return ResponseEntity.status(HttpStatus.CREATED).body(dtoResponse);
+        } catch (Exception e) {
+            System.err.println("Erro ao criar plano de saúde: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<PlanoDeSaudeDTO>> obterPlanoDeSaude(@PathVariable Long id) {
+    public ResponseEntity<PlanoDeSaudeDTO> obterPlanoDeSaude(@PathVariable Long id) {
         PlanoDeSaude planoDeSaude = planoDeSaudeService.obterPlanoDeSaudePorId(id);
-        EntityModel<PlanoDeSaudeDTO> resource = EntityModel.of(convertToDTO(planoDeSaude));
-
-        // Adicionando links
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).obterPlanoDeSaude(id)).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).atualizarPlanoDeSaude(id, convertToDTO(planoDeSaude))).withRel("atualizar"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).listarPlanosDeSaude()).withRel("listarPlanos"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).excluirPlanoDeSaude(id)).withRel("excluir"));
-
-        return ResponseEntity.ok(resource);
+        PlanoDeSaudeDTO dtoResponse = convertToDTO(planoDeSaude);
+        adicionarLinks(dtoResponse);
+        return ResponseEntity.ok(dtoResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<EntityModel<PlanoDeSaudeDTO>>> listarPlanosDeSaude() {
+    public ResponseEntity<List<PlanoDeSaudeDTO>> listarPlanosDeSaude() {
         List<PlanoDeSaude> planosDeSaude = planoDeSaudeService.listarPlanosDeSaude();
-        List<EntityModel<PlanoDeSaudeDTO>> planosDTO = planosDeSaude.stream()
-                .map(plano -> {
-                    EntityModel<PlanoDeSaudeDTO> resource = EntityModel.of(convertToDTO(plano));
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).obterPlanoDeSaude(plano.getIdPlano())).withSelfRel());
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).atualizarPlanoDeSaude(plano.getIdPlano(), convertToDTO(plano))).withRel("atualizar"));
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).excluirPlanoDeSaude(plano.getIdPlano())).withRel("excluir"));
-                    return resource;
-                })
+        List<PlanoDeSaudeDTO> planosDTO = planosDeSaude.stream()
+                .map(this::convertToDTO)
+                .peek(this::adicionarLinks)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(planosDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<PlanoDeSaudeDTO>> atualizarPlanoDeSaude(@PathVariable Long id, @Valid @RequestBody PlanoDeSaudeDTO planoDeSaudeDTO) {
+    public ResponseEntity<PlanoDeSaudeDTO> atualizarPlanoDeSaude(@PathVariable Long id, @Valid @RequestBody PlanoDeSaudeDTO planoDeSaudeDTO) {
         PlanoDeSaude planoDeSaudeAtualizado = planoDeSaudeService.atualizarPlanoDeSaude(id, convertToEntity(planoDeSaudeDTO));
-        EntityModel<PlanoDeSaudeDTO> resource = EntityModel.of(convertToDTO(planoDeSaudeAtualizado));
-
-        // Adicionando links
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).obterPlanoDeSaude(id)).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).listarPlanosDeSaude()).withRel("listarPlanos"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).excluirPlanoDeSaude(id)).withRel("excluir"));
-
-        return ResponseEntity.ok(resource);
+        PlanoDeSaudeDTO dtoResponse = convertToDTO(planoDeSaudeAtualizado);
+        adicionarLinks(dtoResponse);
+        return ResponseEntity.ok(dtoResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirPlanoDeSaude(@PathVariable Long id) {
         planoDeSaudeService.excluirPlanoDeSaude(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Método para adicionar links HATEOAS ao DTO
+    private void adicionarLinks(PlanoDeSaudeDTO planoDeSaudeDTO) {
+        if (planoDeSaudeDTO != null) {
+            Long id = planoDeSaudeDTO.getIdPlano();
+            planoDeSaudeDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).obterPlanoDeSaude(id)).withSelfRel());
+            planoDeSaudeDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).atualizarPlanoDeSaude(id, planoDeSaudeDTO)).withRel("atualizar"));
+            planoDeSaudeDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).listarPlanosDeSaude()).withRel("listarPlanos"));
+            planoDeSaudeDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PlanoDeSaudeController.class).excluirPlanoDeSaude(id)).withRel("excluir"));
+        }
     }
 
     private PlanoDeSaudeDTO convertToDTO(PlanoDeSaude planoDeSaude) {

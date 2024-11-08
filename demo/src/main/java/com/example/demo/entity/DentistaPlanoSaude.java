@@ -26,4 +26,6 @@ public class DentistaPlanoSaude {
     @JoinColumn(name = "id_plano", nullable = false)
     private PlanoDeSaude planoDeSaude;
 
+    public DentistaPlanoSaude(Long planoId, Long dentistaId) {
+    }
 }

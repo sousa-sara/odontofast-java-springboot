@@ -1,17 +1,13 @@
 package com.example.demo.controller;
-
 import com.example.demo.dto.DentistaDTO;
 import com.example.demo.entity.Dentista;
-import com.example.demo.service.DentistaService;
+import com.example.demo.service.interfaces.DentistaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,66 +20,44 @@ public class DentistaController {
     private DentistaService dentistaService;
 
     @PostMapping
-    public ResponseEntity<EntityModel<DentistaDTO>> criarDentista(@Valid @RequestBody DentistaDTO dentistaDTO) {
+    public ResponseEntity<DentistaDTO> criarDentista(@Valid @RequestBody DentistaDTO dentistaDTO) {
         try {
-            Dentista novoDentista = dentistaService.criarDentista(convertToEntity(dentistaDTO));
-            EntityModel<DentistaDTO> resource = EntityModel.of(convertToDTO(novoDentista));
-
-            // Adicionando links ao DTO
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).obterDentista(novoDentista.getIdDentista())).withSelfRel());
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).atualizarDentista(novoDentista.getIdDentista(), dentistaDTO)).withRel("atualizar"));
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).listarDentistas()).withRel("listarDentistas"));
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(resource);
+            Dentista novoDentista = dentistaService.criarDentista(new Dentista(dentistaDTO));
+            DentistaDTO dentista = new DentistaDTO(novoDentista);
+            adicionarLinks(dentista);
+            return ResponseEntity.status(HttpStatus.CREATED).body(dentista);
         } catch (Exception e) {
-            // Log da exceção para análise
             System.err.println("Erro ao criar dentista: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null); // Retorna null em caso de erro
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<DentistaDTO>> obterDentista(@PathVariable Long id) {
+    public ResponseEntity<DentistaDTO> obterDentista(@PathVariable Long id) {
         Optional<Dentista> dentistaOptional = dentistaService.obterDentistaPorId(id);
         return dentistaOptional.map(dentista -> {
-            EntityModel<DentistaDTO> resource = EntityModel.of(convertToDTO(dentista));
-
-            // Adicionando links ao DTO
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).obterDentista(id)).withSelfRel());
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).atualizarDentista(id, convertToDTO(dentista))).withRel("atualizar"));
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).excluirDentista(id)).withRel("excluir"));
-            resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).listarDentistas()).withRel("listarDentistas"));
-
+            DentistaDTO resource = new DentistaDTO(dentista);
+            adicionarLinks(resource);
             return ResponseEntity.ok(resource);
         }).orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<EntityModel<DentistaDTO>>> listarDentistas() {
+    public ResponseEntity<List<DentistaDTO>> listarDentistas() {
         List<Dentista> dentistas = dentistaService.listarDentistas();
-        List<EntityModel<DentistaDTO>> dentistaDTOs = dentistas.stream()
-                .map(dentista -> {
-                    EntityModel<DentistaDTO> resource = EntityModel.of(convertToDTO(dentista));
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).obterDentista(dentista.getIdDentista())).withSelfRel());
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).atualizarDentista(dentista.getIdDentista(), convertToDTO(dentista))).withRel("atualizar"));
-                    resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).excluirDentista(dentista.getIdDentista())).withRel("excluir"));
-                    return resource;
-                })
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dentistaDTOs);
+        return ResponseEntity.ok(
+                dentistas.stream()
+                        .map(DentistaDTO::new)
+                        .peek(this::adicionarLinks)
+                        .collect(Collectors.toList())
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<DentistaDTO>> atualizarDentista(@PathVariable Long id, @Valid @RequestBody DentistaDTO dentistaDTO) {
-        Dentista dentistaAtualizado = dentistaService.atualizarDentista(id, convertToEntity(dentistaDTO));
-        EntityModel<DentistaDTO> resource = EntityModel.of(convertToDTO(dentistaAtualizado));
-
-        // Adicionando links ao DTO
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).obterDentista(id)).withSelfRel());
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).excluirDentista(id)).withRel("excluir"));
-        resource.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).listarDentistas()).withRel("listarDentistas"));
-
+    public ResponseEntity<DentistaDTO> atualizarDentista(@PathVariable Long id, @Valid @RequestBody DentistaDTO dentistaDTO) {
+        Dentista dentistaAtualizado = dentistaService.atualizarDentista(id, new Dentista(dentistaDTO));
+        DentistaDTO resource = new DentistaDTO(dentistaAtualizado);
+        adicionarLinks(resource);
         return ResponseEntity.ok(resource);
     }
 
@@ -93,25 +67,11 @@ public class DentistaController {
         return ResponseEntity.noContent().build();
     }
 
-    // Métodos de conversão entre DTO e Entidade
-    private Dentista convertToEntity(DentistaDTO dto) {
-        return new Dentista(
-                dto.getIdDentista(),
-                dto.getNomeDentista(),
-                dto.getSenhaDentista(),
-                dto.getEspecialidade(),
-                dto.getCro(),
-                null
-        );
-    }
-
-    private DentistaDTO convertToDTO(Dentista entity) {
-        return new DentistaDTO(
-                entity.getIdDentista(),
-                entity.getNomeDentista(),
-                entity.getSenhaDentista(),
-                entity.getEspecialidade(),
-                entity.getCro()
-        );
+    // Método para adicionar links HATEOAS ao DTO
+    private void adicionarLinks(DentistaDTO dentistaDTO) {
+        dentistaDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).obterDentista(dentistaDTO.getIdDentista())).withSelfRel());
+        dentistaDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).atualizarDentista(dentistaDTO.getIdDentista(), dentistaDTO)).withRel("atualizar"));
+        dentistaDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).listarDentistas()).withRel("listarDentistas"));
+        dentistaDTO.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(DentistaController.class).excluirDentista(dentistaDTO.getIdDentista())).withRel("excluir"));
     }
 }

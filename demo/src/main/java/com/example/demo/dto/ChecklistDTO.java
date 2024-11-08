@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.entity.Checklist;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,10 +13,10 @@ import org.springframework.hateoas.RepresentationModel;
 @AllArgsConstructor
 public class ChecklistDTO extends RepresentationModel<ChecklistDTO>  {
 
-    private Long idChecklist; // ID do Checklist
-    private Integer escovacaoDentes; // Escovação dos dentes
-    private Integer fioDental; // Uso do fio dental
-    private Integer enxaguanteBucal; // Uso de enxaguante bucal
-    private Long usuarioIdUsuario; // ID do Usuário associado
+    private Long idChecklist;
+    private Integer escovacaoDentes;
+    private Integer fioDental;
+    private Integer enxaguanteBucal;
+    private Long usuarioIdUsuario;
 
 }
